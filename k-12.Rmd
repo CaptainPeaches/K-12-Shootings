@@ -1,0 +1,103 @@
+---
+title: "K-12 shootings"
+author: "Captain Peaches"
+date: "December 11, 2018"
+output: html_document
+---
+
+## Setup & Data
+
+```{r setup-1, echo=FALSE}
+library(tidyverse)
+library(DescTools)
+library(DataExplorer)
+```
+
+Load data
+
+```{r data, echo=FALSE}
+dat <- read.csv("K-12 shootings (Public) - K-12 SSDB (Public) Linked.csv", sep = ",")
+```
+
+# Take a peek
+
+First exmaine the structure of the data, as well as the type and structure of the variables. 
+```{r}
+str(dat)
+```
+
+I see many variables we might be interested in. Initially, I'm curious to know the distribution of the reasons the shooting occured. 
+
+First, lets check our dataset for missing parameters and cleanliness. 
+
+```{r clean}
+plot_intro(dat)
+```
+
+Lets also check our variables for correlation, this will make it easier to confirm if a question is possible to answer or not. 
+
+ 
+
+```{r correlation}
+dat %>%
+  plot_correlation(type = "c", maxcat = 5)
+```
+
+** Need to fix this plot 
+
+# Question 1
+
+What is the distribution for reasons the shooting was committed? is there an outlying reason shootings occur seemingly more than anywhere else in the world? 
+
+What is the preferred type of weapon/firearm used by the shooters in our ds?
+
+```{r}
+dat %>%
+  ggplot(aes(x = Firearm.Type)) + 
+  geom_histogram(stat = "count") +
+  labs(title = "Type of Firearms used in K-12 Incidents", x = "Firearm type", y = "count") + scale_x_discrete(labels = abbreviate, limits = c("Combination", "Handgun", "Other", "Rifle", "Shotgun"))
+```
+
+Handguns were used in easily the majority of these shootings. 
+
+# Question 2
+
+What kind of shootings have the most victims? Reasoning being somewhat stoic, but when shooters are more "angry", does this have any affect on the number of lives they take? 
+
+```{r reason~victims}
+dat %>%
+  ggplot(aes(x = reorder(as.factor(Category), Total.Injured.Killed.Victims), y = Total.Injured.Killed.Victims)) +
+  geom_boxplot(alpha = .3, color = "red") +
+  coord_flip() + 
+  labs(title = "Number of victims described by incident type", y = "# of Victims", 
+         x = "Reason shooting occured") 
+```
+
+It seems as though this can be somewhat confirmed, however plausible at best. The main observation is that shootings that occured due to Race, Mental Health, Murder/suicide, Hostages, and illegal drug related tend to have more victims. 
+
+What is most surprising is that shootings deemed "indiscriminate" tend to have the most victims. Could this be a reporting error, as we don't have techniques, etc to recognize the cause behind these shootings? Or is it more likely when the "indiscriminate" shooters are searching out targets, everyone becomes a target. 
+
+Lucky for us, we can check to see in how may of these cases the shooter was targetting anyone specifically. 
+
+```{r}
+dat %>%
+  ggplot(aes(x = Targeted.Specific.Victim.s., fill = Targeted.Specific.Victim.s.)) +
+  geom_bar() + coord_flip() + xlim("Y", "N", "Unkown", "Officer Involved")
+```
+
+This seems to contradict our thoughts above, concerning who is the target when the shooting is "indiscriminate". This points to make our "anger hypothesis" more plausible than the former. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
